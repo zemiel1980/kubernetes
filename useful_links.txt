@@ -1,0 +1,3 @@
+https://blog.techiescamp.com/kubernetes-learning-series/
+
+https://www.linkedin.com/pulse/krm-native-gitops-yes-without-flux-fluxcd-nothing-mialon-wsmue
