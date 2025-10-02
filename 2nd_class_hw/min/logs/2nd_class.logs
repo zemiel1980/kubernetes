@@ -6,7 +6,6 @@ sudo PATH=$PATH:/opt/cni/bin:/usr/sbin kubebuilder/bin/kubelet \
     --hostname-override=$(hostname) \
     --pod-infra-container-image=registry.k8s.io/pause:3.10 \
     --node-ip=$HOST_IP \
-    --cloud-provider=external \
     --cgroup-driver=cgroupfs \
     --v=1 &
 

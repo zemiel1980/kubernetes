@@ -20,10 +20,8 @@ spec:
         capabilities:
           add: ["SYS_ADMIN","SYS_PTRACE","SYS_RESOURCE","SYS_MODULE","PERFMON"]
       volumeMounts:
-        # ядро/модулі корисні для perf (якщо є на вузлі)
         - { name: lib-modules, mountPath: /lib/modules, readOnly: true }
         - { name: boot, mountPath: /boot, readOnly: true }
-        # покладемо артефакти в /work — зручно потім kubectl cp
         - { name: work, mountPath: /work }
   volumes:
     - name: lib-modules
