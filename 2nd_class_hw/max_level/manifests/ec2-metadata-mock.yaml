@@ -1,0 +1,105 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: amazon-ec2-metadata-mock-sa
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: amazon-ec2-metadata-mock
+    app.kubernetes.io/instance: amazon-ec2-metadata-mock
+---
+# Порожня роль (доступи не потрібні)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: amazon-ec2-metadata-mock
+rules: []
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: amazon-ec2-metadata-mock
+subjects:
+  - kind: ServiceAccount
+    name: amazon-ec2-metadata-mock-sa
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: amazon-ec2-metadata-mock
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amazon-ec2-metadata-mock
+  namespace: kube-system
+  labels:
+    app.kubernetes.io/name: amazon-ec2-metadata-mock
+    app.kubernetes.io/instance: amazon-ec2-metadata-mock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: amazon-ec2-metadata-mock
+      app.kubernetes.io/instance: amazon-ec2-metadata-mock
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: amazon-ec2-metadata-mock
+        app.kubernetes.io/instance: amazon-ec2-metadata-mock
+    spec:
+      serviceAccountName: amazon-ec2-metadata-mock-sa
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      nodeSelector:
+        kubernetes.io/os: linux
+      tolerations:
+        - operator: Exists
+
+      # 169.254.169.254 -> loopback + дозволити локальні NodePorts/localhost
+      initContainers:
+        - name: setup-imds
+          image: busybox:1.36
+          securityContext:
+            runAsUser: 0
+            capabilities:
+              add: ["NET_ADMIN","NET_RAW"]
+          command: ["sh","-euxc"]
+          args:
+            - |
+              sysctl -w net.ipv4.conf.all.route_localnet=1 || true
+              ip link set lo up || true
+              # локальний маршрут на адресу метаданих
+              ip route replace local 169.254.169.254/32 dev lo table local
+              ip route get 169.254.169.254 || true
+
+      containers:
+        - name: amazon-ec2-metadata-mock
+          image: public.ecr.aws/aws-ec2/amazon-ec2-metadata-mock:v1.13.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: AEMM_SERVER_HOSTNAME
+              value: ""       # слухати на всіх інтерфейсах (із hostNetwork це й нода)
+            - name: AEMM_MOCK_IP_COUNT
+              value: "2"
+          ports:
+            - name: mock
+              containerPort: 1338
+          securityContext:
+            runAsUser: 0
+            allowPrivilegeEscalation: false
+          resources:
+            requests: { cpu: 50m,  memory: 64Mi }
+            limits:   { cpu: 100m, memory: 128Mi }
+
+        # Сайдкар: слухає порт 80 і форвардить у mock на 1338
+        - name: port80-proxy
+          image: alpine/socat:1.7.4.3-r0
+          securityContext:
+            runAsUser: 0
+            capabilities:
+              add: ["NET_BIND_SERVICE"]
+          command: ["sh","-c","exec socat TCP-LISTEN:80,fork,reuseaddr TCP:127.0.0.1:1338"]
+          ports:
+            - name: http
+              containerPort: 80
