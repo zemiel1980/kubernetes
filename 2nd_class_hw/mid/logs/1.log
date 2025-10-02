@@ -1,0 +1,48 @@
+  185  sudo kubectl apply -f manifests/kube-flame.yaml
+  186  sudo kubebuilder/bin/kubectl get all -A
+  188  sudo kubectl -n kube-system exec -it debug-flame -- sh -lc '
+  pid=$(pgrep -f "[k]ube-apiserver" | head -n1);
+  echo "APISERVER_PID=${pid}";
+'
+  190  kubectl -n kube-system exec -it debug-flame -- sh -lc '
+  PID=$(pgrep -f "[k]ube-apiserver" | head -n1);
+  echo "Profiling PID=$PID for 30s...";
+  perf record -F 99 -g -p "$PID" -- sleep 30;
+  cp perf.data /work/out.data
+'
+  192  sudo kubebuilder/bin/kubectl get all -A
+  193  sudo sudo kubectl -n kube-system exec -it debug-flame -- sh -lc 'cat /etc/os-release || uname -a'
+  195  sudo sh -c 'echo 1 > /proc/sys/kernel/perf_event_paranoid'
+  196  sudo sh -c 'echo 0 > /proc/sys/kernel/kptr_restrict'
+  199  sudo kubectl -n kube-system exec -it debug-flame -- sh -lc 'cat /etc/os-release || uname -a'
+  200  sudo kubectl -n kube-system exec -it debug-flame -- sh -lc 'bash'
+  201  sudo kubectl -n kube-system exec -it debug-flame -- sh -lc 'sh'
+
+zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl -n kube-system exec -it debug-flame -- sh -lc 'sh'
+codespaces-1f25ba:/# perl
+perl        perl5.34.0  perldoc
+codespaces-1f25ba:/# cd /
+codespaces-1f25ba:/# find . -name perf
+find: ./proc/70054/task/70062/fdinfo/73: No such file or directory
+./app/perf
+codespaces-1f25ba:/# ls -la ./app/perf 
+-rwxr-xr-x    1 root     root       8422720 Nov 22  2021 ./app/perf
+
+  202  kubectl -n kube-system exec -it debug-flame -- sh -lc '
+  sysctl -w kernel.perf_event_paranoid=1 || true
+  sysctl -w kernel.kptr_restrict=0 || true
+'
+  207  sudo kubectl -n kube-system exec -it debug-flame -- sh -lc '
+  PID=$(pgrep -f "[k]ube-apiserver" | head -n1);
+  echo "Profiling PID=$PID for 30s...";
+  ./app/perf record -F 99 -g -p "$PID" -- sleep 30;
+  cp perf.data /work/out.data
+'
+  212  sudo kubectl -n kube-system exec -it debug-flame -- sh -lc '
+  ./app/perf script -i /work/out.data \
+    | "/app/FlameGraph/stackcollapse-perf.pl" \
+    | "/app/FlameGraph/flamegraph.pl" > /work/flame.svg
+  ls -lh /work/flame.svg
+'
+  213  sudo kubectl cp -n kube-system debug-flame:/work/flame.svg ./flame.svg
+  214  history
