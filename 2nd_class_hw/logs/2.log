@@ -1,0 +1,146 @@
+    4  ps aux
+    6  cat /var/lib/kubelet/config.yaml
+    7  HOST_IP=$(hostname -I | awk '{print $1}')
+    8  sudo PATH=$PATH:/opt/cni/bin:/usr/sbin kubebuilder/bin/kubelet   --kubeconfig=/var/lib/kubelet/kubeconfig   --config=/var/lib/kubelet/config.yaml   --root-dir=/var/lib/kubelet   --cert-dir=/var/lib/kubelet/pki   --hostname-override=$(hostname)   --pod-infra-container-image=registry.k8s.io/pause:3.10   --node-ip=$HOST_IP   --cloud-provider=external   --cgroup-driver=cgroupfs   --max-pods=6   --v=1 &
+    9  ps aux | grep kubelet
+   10  sudo  kill -9 10580
+   11  ps aux | grep kubelet
+   18  sudo mkdir /var/lib/etcd
+   19  sudo cp manifests/etcd.yaml /etc/kubernetes/manifests/
+   20  sudo cp manifests/kube-apiserver.yaml /etc/kubernetes/manifests/
+   21  sudo kubebuilder/bin/kubectl get nodes
+   22  sudo kubebuilder/bin/kubectl get all -A
+   23  vi /etc/kubernetes/manifests/etcd.yaml 
+   24  sudo vi /etc/kubernetes/manifests/etcd.yaml 
+   25  sudo vi /etc/kubernetes/manifests/kube-apiserver.yaml 
+   26  sudo kubebuilder/bin/kubectl get all -A
+   27  journalctl -u kubelet -f
+   28  sudo vi /etc/kubernetes/manifests/etcd.yaml 
+   29  sudo vi /etc/kubernetes/manifests/kube-apiserver.yaml 
+   30  sudo kubebuilder/bin/kubectl get all -A
+   32  curl -k https://127.0.0.1:6443/readyz?verbose
+   33  netstat -anp | grep LIST
+   34  ls -la /etc/kubernetes/manifests/
+   37  sudo vi /etc/kubernetes/manifests/etcd.yaml 
+   38  sudo vi /etc/kubernetes/manifests/kube-apiserver.yaml 
+   42  sudo mv /etc/kubernetes/manifests/*.yaml /workspaces/kubernetes/manifests/1/
+   43  ps aux | grep kubelet
+   44  sudo kill -9 11729 11728 11717
+   45  ps aux | grep kubelet
+   46  sudo cp /root/.kube/config /var/lib/kubelet/kubeconfig
+   48  cp /tmp/sa.pub /tmp/ca.crt
+   50  HOST_IP=$(hostname -I | awk '{print $1}')
+   51  kubectl 
+   52  cp manifests/1/etcd.yaml /etc/kubernetes/manifests/
+   53  netstat -anp | grep LIST
+   54  cp manifests/1/kube-apiserver.yaml /etc/kubernetes/manifests/
+   55  sudo cp manifests/1/etcd.yaml /etc/kubernetes/manifests/
+   56  sudo cp manifests/1/kube-apiserver.yaml /etc/kubernetes/manifests/
+   57  curl -k https://127.0.0.1:6443/readyz?verbose
+   58  kubectl get nodes -o wide
+   59  sudo kubectl get nodes -o wide
+   60  sudo kubebuilder/bin/kubectl get all -A
+   61  cat /etc/kubernetes/manifests/etcd.yaml 
+   62  ls -la
+   63  cd manifests/
+   64  ls -la
+   65  chown codespace:codespace etcd.yaml 
+   66  sudo chown codespace:codespace etcd.yaml 
+   67  ls -la
+   68  sudo chown codespace:codespace kube-apiserver.yaml 
+   69  cat etcd.yaml 
+   70  cp etcd.yaml /etc/kubernetes/manifests/
+   71  sudo cp etcd.yaml /etc/kubernetes/manifests/
+   72  kubectl get nodes -o wide
+   73  sudo kubectl get nodes -o wide
+   74  sudo kubebuilder/bin/kubectl get all -A
+   75  cd ..
+   76  sudo kubebuilder/bin/kubectl get all -A
+   77  sudo kubebuilder/bin/kubectl get --raw='/readyz?verbose'
+   78  sudo kubebuilder/bin/kubectl get componentstatuses
+   79  curl -s http://127.0.0.1:2379/health
+   80  curl -s http://$(hostname -I | awk '{print $1}'):2379/health
+   81  sudo cp manifests/kube-apiserver.yaml /etc/kubernetes/manifests/
+   82  sudo kubebuilder/bin/kubectl get all -A
+   83  netstat -anp | grep LIST
+   84  sudo kubebuilder/bin/kubectl get all -A
+   85  sudo kubebuilder/bin/kubectl get nodes
+   86  sudo kubebuilder/bin/kubectl get componentstatuses
+   87  cp manifests/kube-scheduler.yaml /etc/kubernetes/manifests/
+   88  sudo cp manifests/kube-scheduler.yaml /etc/kubernetes/manifests/
+   89  sudo kubebuilder/bin/kubectl get componentstatuses
+   90  sudo cp manifests/kube-controller-manager.yaml /etc/kubernetes/manifests/
+   91  sudo kubebuilder/bin/kubectl get componentstatuses
+   93  cd manifests/
+   94  kubectl apply -f nginx-deploy.yaml 
+   95  sudo kubectl apply -f nginx-deploy.yaml 
+   96  sudo kubebuilder/bin/kubectl get componentstatuses
+   97  cd ..
+   98  sudo kubebuilder/bin/kubectl get componentstatuses
+   99  sudo kubebuilder/bin/kubectl get nodes
+  100  sudo kubebuilder/bin/kubectl get all -A
+  101  kubectl get deploy,rs,pods -l app=nginx -o wide
+  102  sudo kubectl get deploy,rs,pods -l app=nginx -o wide
+  103  curl -s http://127.0.0.1:8080/
+  104  curl -s http://127.0.0.1:30080/
+  105  netstat -anp | grep LIST
+  106  netstat -anp | grep LIST | grep 80
+  107  netstat -anp | grep LIST | grep 30080
+  108  sudo netstat -anp | grep LIST | grep 30080
+  109  kubectl get nodes -o wide
+  110  sudo kubectl get nodes -o wide
+  111  curl -s http://10.0.1.70:30080
+  112  curl -s http://10.0.1.70:80
+  113  kubectl describe pod nginx-deployment-5d868f699d-vv4bz
+  114  sudo kubectl describe pod nginx-deployment-5d868f699d-vv4bz
+  115  sudo kubebuilder/bin/kubectl get all -A
+  116  vi /var/lib/kubelet/config.yaml 
+  117  sudo vi /var/lib/kubelet/config.yaml 
+  118  sudo kubebuilder/bin/kubectl get all -A
+  119  sudo kubectl get nodes -o wide
+  120  curl http://10.0.1.70:30080
+  121  sudo kubectl -n kube-system get ds kube-proxy
+  122  sudo kubectl -n kube-system get pods -l k8s-app=kube-proxy -o wide
+  123  cd manifests/
+  124  curl -LO https://raw.githubusercontent.com/kubernetes/website/main/content/en/examples/admin/kube-proxy/kube-proxy.yaml
+  125  sudo kubectl apply -f kube-proxy.yaml -n kube-system
+  126  sudo kubebuilder/bin/kubectl get all -A
+  127  cd ..
+  128  sudo kubebuilder/bin/kubectl get all -A
+  129  sudo kubectl -n kube-system get ds kube-proxy
+  130  sudo kubectl -n kube-system get pods -l k8s-app=kube-proxy -o wide
+  131  sudo kubectl apply -f kube-proxy.yaml -n kube-system
+  132  cd manifests/
+  133  sudo kubectl apply -f kube-proxy.yaml -n kube-system
+  134  kubectl -n kube-system get pods -l k8s-app=kube-proxy -w
+  135  suido kubectl -n kube-system get pods -l k8s-app=kube-proxy -w
+  136  sudo kubectl -n kube-system get pods -l k8s-app=kube-proxy -w
+  137  sudo kubectl -n kube-system logs -l k8s-app=kube-proxy --tail=100
+  138  cd /run/
+  139  ls -la
+  140  sudo kubectl apply -f kube-proxy.yaml -n kube-system
+  141  cd ma
+  142  cd /workspaces/kubernetes/manifests/
+  143  sudo kubectl apply -f kube-proxy.yaml -n kube-system
+  144  kubectl -n kube-system get pods -l k8s-app=kube-proxy -w
+  145  sudo ubectl -n kube-system get pods -l k8s-app=kube-proxy -w
+  146  sudo kubectl -n kube-system get pods -l k8s-app=kube-proxy -w
+  147  kubectl -n kube-system logs -l k8s-app=kube-proxy --tail=100
+  148  sudo kubectl -n kube-system logs -l k8s-app=kube-proxy --tail=100
+  149  sudo kubectl get svc nginx-service -o wide
+  150  curl http://10.0.0.244:30080
+  151  curl http://10.0.1.70:30080
+  152  curl http://10.0.0.244
+  153  cat /var/lib/kubelet/config.yaml 
+  154  curl http://10.0.0.244
+  156  sudo kubebuilder/bin/kubectl get nodes
+  157  cd ..
+  158  sudo kubebuilder/bin/kubectl get nodes
+  159  sudo kubebuilder/bin/kubectl get componentstatuses
+  160  udo kubebuilder/bin/kubectl get --raw='/readyz?verbose'
+  161  sudo kubebuilder/bin/kubectl get --raw='/readyz?verbose'
+  162  sudo kubebuilder/bin/kubectl get all -A
+  164  sudo kubectl -n kube-system get pods -l k8s-app=kube-proxy -w
+  165  sudo kubebuilder/bin/kubectl get nodes -w
+  166  kubectl describe node codespaces-1f25ba
+  167  sudo kubectl describe node codespaces-1f25ba

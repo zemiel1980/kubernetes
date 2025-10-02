@@ -1,0 +1,36 @@
+ 1  uptime
+    2  ps aux
+    3  openssl genrsa -out /workspaces/tmp/sa.key 2048
+    4  mkdir /workspaces/tmp
+    5  openssl genrsa -out /workspaces/tmp/sa.key 2048
+    6  openssl rsa -in /workspace/tmp/sa.key -pubout -out /workspace/tmp/sa.pub
+    7  openssl genrsa -out /tmp/sa.key 2048
+    8  openssl rsa -in /tmp/sa.key -pubout -out /tmp/sa.pub
+    9  rm /workspaces/tmp/sa.key 
+   10  ls /workspaces/tmp/
+   11  TOKEN="1234567890"
+   12  echo "${TOKEN},admin,admin,system:masters" > /tmp/token.csv
+   13  openssl genrsa -out /tmp/ca.key 2048
+   14  openssl req -x509 -new -nodes -key /tmp/ca.key -subj "/CN=kubelet-ca" -days 365 -out /tmp/ca.crt
+   15  sudo cp /tmp/ca.crt /var/lib/kubelet/ca.crt
+   16  sudo cp /tmp/ca.crt /var/lib/kubelet/pki/ca.crt
+   17  ls -la /tmp/
+   18  cp /tmp/ca.crt /workspaces/tmp/
+   19  cp /tmp/ca.key /workspaces/tmp/
+   20  cp /tmp/sa.key /workspaces/tmp/
+   21  cp /tmp/sa.pub /workspaces/tmp/
+   22  cp /tmp/token.csv /workspaces/tmp/
+   23  export PATH=$PATH:/opt/cni/bin:kubebuilder/bin
+   24  sudo PATH=$PATH:/opt/cni/bin:/usr/sbin /opt/cni/bin/containerd -c /etc/containerd/config.toml &
+   25  sudo PATH=$PATH:/opt/cni/bin:/usr/sbin kubebuilder/bin/kubelet   --kubeconfig=/var/lib/kubelet/kubeconfig   --config=/var/lib/kubelet/config.yaml   --root-dir=/var/lib/kubelet   --cert-dir=/var/lib/kubelet/pki   --hostname-override=$(hostname)   --pod-infra-container-image=registry.k8s.io/pause:3.10   --node-ip=$HOST_IP   --cloud-provider=external   --cgroup-driver=cgroupfs   --max-pods=6   --v=1 &
+   26  echo $HOST_IP
+   27  HOST_IP=$(hostname -I | awk '{print $1}')
+   28  echo $HOST_IP
+   29  sudo PATH=$PATH:/opt/cni/bin:/usr/sbin kubebuilder/bin/kubelet   --kubeconfig=/var/lib/kubelet/kubeconfig   --config=/var/lib/kubelet/config.yaml   --root-dir=/var/lib/kubelet   --cert-dir=/var/lib/kubelet/pki   --hostname-override=$(hostname)   --pod-infra-container-image=registry.k8s.io/pause:3.10   --node-ip=$HOST_IP  --cgroup-driver=cgroupfs   --max-pods=6   --v=1 &
+   30  history > 2.txt
+   31  clear
+   32  ps aux | grep kubel
+   33  sudo kill -9 53319
+   34  ps aux | grep kubel
+   35  sudo PATH=$PATH:/opt/cni/bin:/usr/sbin kubebuilder/bin/kubelet   --kubeconfig=/var/lib/kubelet/kubeconfig   --config=/var/lib/kubelet/config.yaml   --root-dir=/var/lib/kubelet   --cert-dir=/var/lib/kubelet/pki   --hostname-override=$(hostname)   --pod-infra-container-image=registry.k8s.io/pause:3.10   --node-ip=$HOST_IP  --cgroup-driver=cgroupfs --v=1
+   36  sudo PATH=$PATH:/opt/cni/bin:/usr/sbin kubebuilder/bin/kubelet   --kubeconfig=/var/lib/kubelet/kubeconfig   --config=/var/lib/kubelet/config.yaml   --root-dir=/var/lib/kubelet   --cert-dir=/var/lib/kubelet/pki   --hostname-override=$(hostname)   --pod-infra-container-image=registry.k8s.io/pause:3.10   --node-ip=$HOST_IP  --cgroup-driver=cgroupfs --v=1 &

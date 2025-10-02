@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: etcd
+  namespace: kube-system
+  labels: { app: etcd }
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  containers:
+    - name: etcd
+      image: quay.io/coreos/etcd:v3.5.12
+      command: ["/usr/local/bin/etcd"]
+      args:
+        - --name=default
+        - --data-dir=/var/lib/etcd
+        - --listen-client-urls=http://127.0.0.1:2379
+        - --listen-peer-urls=http://127.0.0.1:2380
+        - --advertise-client-urls=http://127.0.0.1:2379
+        - --initial-advertise-peer-urls=http://127.0.0.1:2380
+        - --initial-cluster=default=http://127.0.0.1:2380
+        - --initial-cluster-state=new
+        - --initial-cluster-token=test-token
+      ports:
+        - { containerPort: 2379, name: client }
+        - { containerPort: 2380, name: peer }
+      volumeMounts:
+        - { name: etcd-data, mountPath: /var/lib/etcd }
+  volumes:
+    - name: etcd-data
+      hostPath:
+        path: /var/lib/etcd
+        type: DirectoryOrCreate

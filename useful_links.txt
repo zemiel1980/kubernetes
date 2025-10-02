@@ -1,3 +1,19 @@
 https://blog.techiescamp.com/kubernetes-learning-series/
 
 https://www.linkedin.com/pulse/krm-native-gitops-yes-without-flux-fluxcd-nothing-mialon-wsmue
+
+https://fluxcd.control-plane.io/operator/resourcesets/image-automation/
+
+https://kubernetes.io/docs/reference/access-authn-authz/mutating-admission-policy/
+
+https://www.weekly.tf
+
+https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/
+
+Grafana Beyla, Flame Graf
+
+https://labs.iximiuz.com
+
+https://labs.iximiuz.com/tutorials/container-filesystem-from-scratch
+
+https://fluentbit.io
