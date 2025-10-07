@@ -1,0 +1,22 @@
+TOKEN_ID=$(openssl rand -hex 3)
+TOKEN_SECRET=$(openssl rand -hex 8)
+echo "ID=${TOKEN_ID}  SECRET=${TOKEN_SECRET}"
+sudo kubectl -n kube-system delete secret bootstrap-token-abcd12 --ignore-not-found
+sudo kubectl -n kube-system create secret generic bootstrap-token-${TOKEN_ID}   --type 'bootstrap.kubernetes.io/token'   --from-literal description="kubelet bootstrap token"   --from-literal token-id=${TOKEN_ID}   --from-literal token-secret=${TOKEN_SECRET}   --from-literal usage-bootstrap-authentication=true   --from-literal usage-bootstrap-signing=true
+sudo echo "${TOKEN_ID}.${TOKEN_SECRET},kubelet-bootstrap,uid-kubelet,\"system:bootstrappers\"" | sudo tee -a /tmp/token.csv
+cat /tmp/token.csv 
+sudo kubectl -n kube-system get secret bootstrap-token-${TOKEN_ID} -o yaml | sed -n '1,120p'
+grep -n . /tmp/token.csv | tail -n 3
+curl -sk -H "Authorization: Bearer ${NEW_TOKEN}" ${API}/version --cacert /var/lib/kubelet/ca.crt
+
+openssl genrsa -out /tmp/cluster-ca.key 2048
+openssl req -x509 -new -nodes -key /tmp/cluster-ca.key   -subj "/CN=kubernetes-ca" -days 3650 -out /tmp/cluster-ca.crt
+
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get node
+NAME                STATUS     ROLES    AGE    VERSION
+codespaces-1f25ba   Ready      master   5d6h   v1.30.0
+mac-node            NotReady   <none>   18m    v1.34.1
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get node
+NAME                STATUS   ROLES    AGE    VERSION
+codespaces-1f25ba   Ready    master   5d7h   v1.30.0
+mac-node            Ready    <none>   21m    v1.34.1

@@ -1,0 +1,24 @@
+cd /var/
+   24  cd lib/
+   25  ls -la
+   26  mkdir kubelet-node2
+   27  sudo mkdir kubelet-node2
+   28  cp kubelet/kubeconfig kubelet-node2/
+   29  sudo cp kubelet/kubeconfig kubelet-node2/
+   30  vi kubelet-node2/kubeconfig 
+   31  sudo vi kubelet-node2/kubeconfig 
+   32  vi kubelet/config.yaml 
+   33  sudo mkdir -p /var/lib/kubelet-node2/pki
+   34  sudo mkdir -p /var/lib/kubelet-node2/manifests
+   35  udo cp /tmp/ca.crt /var/lib/kubelet-node2/ca.crt
+   36  sudo cp /tmp/ca.crt /var/lib/kubelet-node2/ca.crt
+   37  sudo cp /tmp/ca.crt /var/lib/kubelet-node2/pki/ca.crt
+   38  sudo PATH=$PATH:/opt/cni/bin:/usr/sbin kubebuilder/bin/kubelet     --kubeconfig=/var/lib/kubelet-node2/kubeconfig     --config=/var/lib/kubelet-node2/config.yaml     --root-dir=/var/lib/kubelet-node2     --cert-dir=/var/lib/kubelet-node2/pki     --hostname-override=node2     --pod-infra-container-image=registry.k8s.io/pause:3.10     --node-ip=$HOST_IP     --cgroup-driver=cgroupfs     --max-pods=15      --v=2 &
+   39  cd /workspaces/kubernetes/
+   40  sudo PATH=$PATH:/opt/cni/bin:/usr/sbin kubebuilder/bin/kubelet     --kubeconfig=/var/lib/kubelet-node2/kubeconfig     --config=/var/lib/kubelet-node2/config.yaml     --root-dir=/var/lib/kubelet-node2     --cert-dir=/var/lib/kubelet-node2/pki     --hostname-override=node2     --pod-infra-container-image=registry.k8s.io/pause:3.10     --node-ip=$HOST_IP     --cgroup-driver=cgroupfs     --max-pods=15      --v=2 &
+
+   @zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubebuilder/bin/kubectl get nodes
+NAME                STATUS     ROLES    AGE    VERSION
+codespaces-1f25ba   NotReady   master   5d2h   v1.30.0
+node2               Ready      <none>   23s    v1.30.0
+

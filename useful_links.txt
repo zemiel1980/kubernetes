@@ -17,3 +17,7 @@ https://labs.iximiuz.com
 https://labs.iximiuz.com/tutorials/container-filesystem-from-scratch
 
 https://fluentbit.io
+
+https://kubernetes.io/docs/concepts/policy/resource-quotas/
+
+https://youtu.be/4cf2Qs8harQ?si=KROUwZpqjfUa0qmS
