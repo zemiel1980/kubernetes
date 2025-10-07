@@ -12,6 +12,10 @@ curl -sk -H "Authorization: Bearer ${NEW_TOKEN}" ${API}/version --cacert /var/li
 openssl genrsa -out /tmp/cluster-ca.key 2048
 openssl req -x509 -new -nodes -key /tmp/cluster-ca.key   -subj "/CN=kubernetes-ca" -days 3650 -out /tmp/cluster-ca.crt
 
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get csr
+NAME                                                   AGE   SIGNERNAME                                    REQUESTOR           REQUESTEDDURATION   CONDITION
+node-csr-xM77RKIEK_szKEIY6FxJTj9Sdzo_2gqUo1vjVP8ZuKc   27m   kubernetes.io/kube-apiserver-client-kubelet   kubelet-bootstrap   <none>              Approved,Issued
+
 @zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get node
 NAME                STATUS     ROLES    AGE    VERSION
 codespaces-1f25ba   Ready      master   5d6h   v1.30.0
