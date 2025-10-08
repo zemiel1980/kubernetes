@@ -22,4 +22,4 @@ https://kubernetes.io/docs/concepts/policy/resource-quotas/
 
 https://youtu.be/4cf2Qs8harQ?si=KROUwZpqjfUa0qmS
 
-2
+3
