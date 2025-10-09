@@ -22,4 +22,26 @@ https://kubernetes.io/docs/concepts/policy/resource-quotas/
 
 https://youtu.be/4cf2Qs8harQ?si=KROUwZpqjfUa0qmS
 
-3
+https://github.com/istio/istio/issues/54540
+
+https://grafana.com/docs/grafana-cloud/monitor-applications/application-observability/manual/map/
+
+https://github.com/cilium/chaos-testing-examples
+
+https://ebpf.io/what-is-ebpf/
+
+https://www.youtube.com/watch?v=-tMUtLFZCyM
+
+https://academy.tigera.io/course/certified-calico-operator-ebpf/
+
+https://isovalent.com/blog/post/connecting-your-kubernetes-island-to-your-network-with-cilium-bgp/
+
+https://microsoft.github.io/ebpf-for-windows/
+
+https://github.com/microsoft/ebpf-for-windows#architectural-overview
+
+https://docs.aws.amazon.com/eks/latest/best-practices/prefix-mode-linux.html
+
+
+
+

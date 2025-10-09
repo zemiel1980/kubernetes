@@ -1,0 +1,121 @@
+   44  go get sigs.k8s.io/controller-runtime@v0.18.4
+   45  go get k8s.io/apimachinery@v0.30.0
+   46  go get k8s.io/api@v0.30.0
+   47  go mod tidy
+   48  controller-gen object paths=./api/...
+   49  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   50  ls -la
+   51  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   52  ls config/crd/bases
+   53  go build -o bin/manager main.go
+   54  sudo kubectl apply -f config/crd/bases/apps.newresource.com_newresources.yaml
+   55  ./bin/manager
+   56  pwd
+   57  go mod edit -module example.local/new-controller
+   58  go mod tidy
+   59  go mod edit -module example.local/new-controller
+   60  go mod tidy
+   61  go mod edit -module example.local/new-controller
+   62  go mod tidy
+   63  go mod edit -module example.local/new-controller
+   64  go mod tidy
+   65  rm -rf config/crd/bases && mkdir -p config/crd/bases
+   66  controller-gen object paths=./api/...
+   67  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   68  sudo kubectl apply -f config/crd/bases/apps.newresource.com_newresources.yaml
+   69  go list -f '{{.Dir}}: {{.GoFiles}}' ./api/v1alpha1
+   70  find . -type f -name '*newresource*_types.go' -o -name 'groupversion.go'
+   71  rm -rf config/crd/bases && mkdir -p config/crd/bases
+   72  sudo rm -rf config/crd/bases && mkdir -p config/crd/bases
+   73  sudo rm -rf config/crd/bases && sudo mkdir -p config/crd/bases
+   74  mkdir -p config/crd/bases
+   75  controller-gen object paths=./api/...
+   76  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   77  controller-gen object paths=./api/...
+   78  pwd
+   79  rm -rf config/crd/bases && mkdir -p config/crd/bases
+   80  controller-gen object paths=./api/...
+   81  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   82  controller-gen object paths=./api/...
+   83  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   84  controller-gen object paths=./api/...
+   85  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   86  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   87  controller-gen object paths=./api/...
+   88  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   89  pwd
+   90  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   91  rm -rf config/crd/bases && mkdir -p config/crd/bases
+   92  controller-gen crd:crdVersions=v1   paths=./api/...   output:crd:artifacts:config=config/crd/bases
+   93  yq '.spec.versions[].name' config/crd/bases/apps.newresource.com_newresources.yaml
+   94  sudo kubectl apply -f config/crd/bases/apps.newresource.com_newresources.yaml
+   95  cat <<EOF | kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world"
+EOF
+
+   96  cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world"
+EOF
+
+   97  sudo kubectl get newresources.apps.newresource.com example-resource -o yaml
+   98  sudo kubebuilder/bin/kubectl get all -A
+   99  cd ..
+  100  sudo kubebuilder/bin/kubectl get all -A
+  101  sudo kubectl get newresource example-resource -o yaml
+  102  cd new-controller-my/
+  103  ./bin/manager
+  104  sudo kubectl get newresource example-resource -o yaml
+  105  history > 3.txt
+
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world"}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 1
+  name: example-resource
+  namespace: default
+  resourceVersion: "19850"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world
+
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: yurii-test2
+spec:
+  foo: "hello world!!!"
+status:
+  ready: true       
+EOF
+newresource.apps.newresource.com/yurii-test2 configured
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ sudo kubectl get newresource yurii-test2 -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"yurii-test2","namespace":"default"},"spec":{"foo":"hello world!!!"},"status":{"ready":true}}
+  creationTimestamp: "2025-10-09T18:08:09Z"
+  generation: 1
+  name: yurii-test2
+  namespace: default
+  resourceVersion: "20314"
+  uid: 843b77c7-431b-4533-8f3f-495a6e78aeb7
+spec:
+  foo: hello world!!!
