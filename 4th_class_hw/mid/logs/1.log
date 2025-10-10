@@ -1,0 +1,490 @@
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubebuilder/bin/kubectl get all -A
+NAMESPACE     NAME                                            READY   STATUS    RESTARTS       AGE
+default       pod/nginx-deployment-5d868f699d-2mtpw           1/1     Running   1 (37m ago)    2d22h
+default       pod/nginx-deployment-5d868f699d-fqlw6           1/1     Running   1 (37m ago)    2d22h
+default       pod/nginx-deployment-5d868f699d-knjpq           1/1     Running   1 (37m ago)    2d22h
+kube-system   pod/amazon-ec2-metadata-mock-7f87464746-l52wm   2/2     Running   2 (37m ago)    3d
+kube-system   pod/etcd-codespaces-1f25ba                      1/1     Running   31 (29m ago)   2d23h
+kube-system   pod/kube-apiserver-codespaces-1f25ba            1/1     Running   29 (37m ago)   2d19h
+kube-system   pod/kube-controller-manager-codespaces-1f25ba   1/1     Running   50 (32m ago)   2d19h
+kube-system   pod/kube-proxy-c58zc                            1/1     Running   1 (37m ago)    3d
+kube-system   pod/kube-scheduler-codespaces-1f25ba            1/1     Running   47 (29m ago)   3d21h
+
+NAMESPACE   NAME                    TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)        AGE
+default     service/kubernetes      ClusterIP   10.0.0.1     <none>        443/TCP        8d
+default     service/nginx-service   NodePort    10.0.0.244   <none>        80:30080/TCP   8d
+
+NAMESPACE     NAME                        DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+kube-system   daemonset.apps/kube-proxy   1         1         1       1            1           <none>          7d23h
+
+NAMESPACE     NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE
+default       deployment.apps/nginx-deployment           3/3     3            3           8d
+kube-system   deployment.apps/amazon-ec2-metadata-mock   1/1     1            1           7d20h
+
+NAMESPACE     NAME                                                  DESIRED   CURRENT   READY   AGE
+default       replicaset.apps/nginx-deployment-5d868f699d           3         3         3       8d
+kube-system   replicaset.apps/amazon-ec2-metadata-mock-7f87464746   1         1         1       7d20h
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world"
+EOF
+newresource.apps.newresource.com/example-resource unchanged
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world"}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 1
+  name: example-resource
+  namespace: default
+  resourceVersion: "21616"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world1111111"
+EOF
+newresource.apps.newresource.com/example-resource configured
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111"}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 2
+  name: example-resource
+  namespace: default
+  resourceVersion: "21678"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world1111111"
+ready:
+> ^C
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world1111111"
+status:
+> ready: false
+> EOF
+The request is invalid: patch: Invalid value: "{\"apiVersion\":\"apps.newresource.com/v1alpha1\",\"kind\":\"NewResource\",\"metadata\":{\"annotations\":{\"kubectl.kubernetes.io/last-applied-configuration\":\"{\\\"apiVersion\\\":\\\"apps.newresource.com/v1alpha1\\\",\\\"kind\\\":\\\"NewResource\\\",\\\"metadata\\\":{\\\"annotations\\\":{},\\\"name\\\":\\\"example-resource\\\",\\\"namespace\\\":\\\"default\\\"},\\\"ready\\\":false,\\\"spec\\\":{\\\"foo\\\":\\\"hello world1111111\\\"},\\\"status\\\":null}\\n\"},\"creationTimestamp\":\"2025-10-09T17:48:22Z\",\"generation\":2,\"managedFields\":[{\"apiVersion\":\"apps.newresource.com/v1alpha1\",\"fieldsType\":\"FieldsV1\",\"fieldsV1\":{\"f:status\":{\".\":{},\"f:ready\":{}}},\"manager\":\"manager\",\"operation\":\"Update\",\"subresource\":\"status\",\"time\":\"2025-10-10T12:41:59Z\"},{\"apiVersion\":\"apps.newresource.com/v1alpha1\",\"fieldsType\":\"FieldsV1\",\"fieldsV1\":{\"f:metadata\":{\"f:annotations\":{\".\":{},\"f:kubectl.kubernetes.io/last-applied-configuration\":{}}},\"f:spec\":{\".\":{},\"f:foo\":{}}},\"manager\":\"kubectl-client-side-apply\",\"operation\":\"Update\",\"time\":\"2025-10-10T12:45:12Z\"}],\"name\":\"example-resource\",\"namespace\":\"default\",\"resourceVersion\":\"21678\",\"uid\":\"4f4a4ae3-7d1c-4de5-936a-e52ef24720cc\"},\"ready\":false,\"spec\":{\"foo\":\"hello world1111111\"}}": strict decoding error: unknown field "ready"
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world1111111"
+status:
+  ready: false
+EOF
+newresource.apps.newresource.com/example-resource configured
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111"},"status":{"ready":false}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 2
+  name: example-resource
+  namespace: default
+  resourceVersion: "21715"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get newresource example-resourc
+e -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111"},"status":{"ready":false}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 2
+  name: example-resource
+  namespace: default
+  resourceVersion: "21715"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world1111111"
+status:
+  ready: false
+EOF
+newresource.apps.newresource.com/example-resource configured
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111"},"status":{"ready":false}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 2
+  name: example-resource
+  namespace: default
+  resourceVersion: "21715"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world1111111"
+status:
+  ready: true 
+EOF
+newresource.apps.newresource.com/example-resource configured
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111"},"status":{"ready":true}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 2
+  name: example-resource
+  namespace: default
+  resourceVersion: "21726"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get newresource example-resourc
+e -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111"},"status":{"ready":true}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 2
+  name: example-resource
+  namespace: default
+  resourceVersion: "21726"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world1111111"
+status:
+  ready: false
+EOF
+newresource.apps.newresource.com/example-resource configured
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111"},"status":{"ready":false}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 2
+  name: example-resource
+  namespace: default
+  resourceVersion: "21733"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world1111111"
+status:
+  ready: false
+EOF
+newresource.apps.newresource.com/example-resource configured
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111"},"status":{"ready":false}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 2
+  name: example-resource
+  namespace: default
+  resourceVersion: "21733"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ KUBEBUILDER_ASSETS="new-controller-my/test/" go test ./...
+# ./...
+pattern ./...: directory prefix . does not contain main module or its selected dependencies
+FAIL    ./... [setup failed]
+FAIL
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ KUBEBUILDER_ASSETS="new-controller-my/test/" go test ./...^C
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ ^C
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ ^C
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ KUBEBUILDER_ASSETS="<PATH_TO_TESTENV_BIN>" go test ./...
+# ./...
+pattern ./...: directory prefix . does not contain main module or its selected dependencies
+FAIL    ./... [setup failed]
+FAIL
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
+go: downloading sigs.k8s.io/controller-runtime/tools/setup-envtest v0.0.0-20251007053059-f48fe1c564dc
+go: downloading github.com/spf13/afero v1.12.0
+go: downloading go.uber.org/multierr v1.10.0
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ pwd
+/workspaces/kubernetes
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ setup-envtest use 1.30.0 --bin-dir ./testbin --install-dir ./testbin^C
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ export KUBEBUILDER_ASSETS=$(setup-envtest use 1.30.0 -p path)
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ go test ./...
+# ./...
+pattern ./...: directory prefix . does not contain main module or its selected dependencies
+FAIL    ./... [setup failed]
+FAIL
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ cd new-controller-my/
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ go test ./...
+
+?       example.local/new-controller-my [no test files]
+?       example.local/new-controller-my/api/v1alpha1    [no test files]
+?       example.local/new-controller-my/controllers     [no test files]
+ok      example.local/new-controller-my/test    7.985s
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ 
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ go test ./... -coverprofile cover.out
+        example.local/new-controller-my         coverage: 0.0% of statements
+        example.local/new-controller-my/api/v1alpha1            coverage: 0.0% of statements
+        example.local/new-controller-my/controllers             coverage: 0.0% of statements
+ok      example.local/new-controller-my/test    7.337s  coverage: 93.1% of statements
+
+
+
+
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ go test ./...
+
+?       example.local/new-controller-my [no test files]
+?       example.local/new-controller-my/api/v1alpha1    [no test files]
+?       example.local/new-controller-my/controllers     [no test files]
+ok      example.local/new-controller-my/test    7.985s
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ 
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ go test ./... -coverprofile cover.out
+        example.local/new-controller-my         coverage: 0.0% of statements
+        example.local/new-controller-my/api/v1alpha1            coverage: 0.0% of statements
+        example.local/new-controller-my/controllers             coverage: 0.0% of statements
+ok      example.local/new-controller-my/test    7.337s  coverage: 93.1% of statements
+
+
+
+
+zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ controller-gen crd paths=./api/... output:crd:dir=config/crd/bases
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ sudo kubectl apply -f config/c
+rd/bases/apps.newresource.com_newresources.yaml
+customresourcedefinition.apiextensions.k8s.io/newresources.apps.newresource.com configured
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111"},"status":{"ready":false}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 2
+  name: example-resource
+  namespace: default
+  resourceVersion: "21733"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: example-resource
+spec:
+  foo: "hello world1111111"
+  shash: "1234566789"
+EOF
+newresource.apps.newresource.com/example-resource configured
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ sudo kubectl get newresource example-resource -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"example-resource","namespace":"default"},"spec":{"foo":"hello world1111111","shash":"1234566789"}}
+  creationTimestamp: "2025-10-09T17:48:22Z"
+  generation: 3
+  name: example-resource
+  namespace: default
+  resourceVersion: "22280"
+  uid: 4f4a4ae3-7d1c-4de5-936a-e52ef24720cc
+spec:
+  foo: hello world1111111
+  shash: "1234566789"
+status:
+  ready: true
+
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ cat <<EOF | sudo kubectl apply -f -
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: yurii-test1     
+spec:
+  foo: "hello world!!!!!"
+  shash: "12345667890000000"
+EOF
+newresource.apps.newresource.com/yurii-test1 configured
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ sudo kubectl get newresource yurii-test2 -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"yurii-test2","namespace":"default"},"spec":{"foo":"hello world!!!"},"status":{"ready":true}}
+  creationTimestamp: "2025-10-09T18:08:09Z"
+  generation: 1
+  name: yurii-test2
+  namespace: default
+  resourceVersion: "21618"
+  uid: 843b77c7-431b-4533-8f3f-495a6e78aeb7
+spec:
+  foo: hello world!!!
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ cat <<EOF | sudo kubectl apply -f -             
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: yurii-test1
+spec:
+  foo: "hello world!!!!!"
+  shash: "12345667890000000"
+EOF
+newresource.apps.newresource.com/yurii-test1 unchanged
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ sudo kubectl get newresource yurii-test1 -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"yurii-test1","namespace":"default"},"spec":{"foo":"hello world!!!!!","shash":"12345667890000000"}}
+  creationTimestamp: "2025-10-09T18:06:07Z"
+  generation: 2
+  name: yurii-test1
+  namespace: default
+  resourceVersion: "22649"
+  uid: e7602ffc-76ed-49ba-935c-e6a25ed371a9
+spec:
+  foo: hello world!!!!!
+  shash: "12345667890000000"
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ cat <<EOF | sudo kubectl apply -f -             
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  name: yurii-test2
+spec:
+  foo: "hello world???"
+  shash: "1234566789@@@@@@@"
+EOF
+newresource.apps.newresource.com/yurii-test2 configured
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ sudo kubectl get newresource yurii-test1 -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"yurii-test1","namespace":"default"},"spec":{"foo":"hello world!!!!!","shash":"12345667890000000"}}
+  creationTimestamp: "2025-10-09T18:06:07Z"
+  generation: 2
+  name: yurii-test1
+  namespace: default
+  resourceVersion: "22649"
+  uid: e7602ffc-76ed-49ba-935c-e6a25ed371a9
+spec:
+  foo: hello world!!!!!
+  shash: "12345667890000000"
+status:
+  ready: true
+@zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ sudo kubectl get newresource yurii-test2 -o yaml
+apiVersion: apps.newresource.com/v1alpha1
+kind: NewResource
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps.newresource.com/v1alpha1","kind":"NewResource","metadata":{"annotations":{},"name":"yurii-test2","namespace":"default"},"spec":{"foo":"hello world???","shash":"1234566789@@@@@@@"}}
+  creationTimestamp: "2025-10-09T18:08:09Z"
+  generation: 2
+  name: yurii-test2
+  namespace: default
+  resourceVersion: "22663"
+  uid: 843b77c7-431b-4533-8f3f-495a6e78aeb7
+spec:
+  foo: hello world???
+  shash: 1234566789@@@@@@@
+status:
+  ready: true
+
+  @zemiel1980 ➜ /workspaces/kubernetes/new-controller-my (main) $ go test ./... -coverprofile cover.out
+        example.local/new-controller-my         coverage: 0.0% of statements
+        example.local/new-controller-my/api/v1alpha1            coverage: 0.0% of statements
+        example.local/new-controller-my/controllers             coverage: 0.0% of statements
+ok      example.local/new-controller-my/test    7.884s  coverage: 93.1% of statements
