@@ -63,3 +63,47 @@ chore(kbot): automated image update
   Warning  GitOperationFailed  8m54s (x3 over 39m)  image-automation-controller  failed to update source: failed to push to remote: authentication required: No anonymous write access.
   Normal   Succeeded           2m15s                image-automation-controller  pushed commit '580d277' to branch 'main'
 chore(kbot): automated image update
+
+
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ kubectl get all -A
+NAMESPACE     NAME                                               READY   STATUS      RESTARTS   AGE
+demo          pod/kbot-86785989c6-mjxhw                          1/1     Running     0          7m37s
+flux-system   pod/dnsdiag                                        0/2     Completed   0          79m
+flux-system   pod/helm-controller-7bdfb977b9-b5jtd               1/1     Running     0          131m
+flux-system   pod/image-automation-controller-75c6fc4447-kxvmt   1/1     Running     0          131m
+flux-system   pod/image-reflector-controller-6c46bc565f-cqfgh    1/1     Running     0          131m
+flux-system   pod/kustomize-controller-67454c8964-srvbg          1/1     Running     0          131m
+flux-system   pod/notification-controller-7d8b849448-tf5qd       1/1     Running     0          131m
+flux-system   pod/source-controller-db6864b9-j85b4               1/1     Running     0          131m
+kube-system   pod/coredns-c7b9fc47-jdvv8                         1/1     Running     0          85m
+kube-system   pod/coredns-c7b9fc47-zqsc5                         1/1     Running     0          85m
+
+NAMESPACE     NAME                              TYPE        CLUSTER-IP    EXTERNAL-IP   PORT(S)         AGE
+default       service/kubernetes                ClusterIP   10.10.0.1     <none>        443/TCP         138m
+demo          service/kbot                      ClusterIP   10.10.0.233   <none>        8080/TCP        65m
+flux-system   service/notification-controller   ClusterIP   10.10.0.140   <none>        80/TCP          131m
+flux-system   service/source-controller         ClusterIP   10.10.0.225   <none>        80/TCP          131m
+flux-system   service/webhook-receiver          ClusterIP   10.10.0.235   <none>        80/TCP          131m
+kube-system   service/kube-dns                  ClusterIP   10.10.0.53    <none>        53/UDP,53/TCP   86m
+
+NAMESPACE     NAME                                          READY   UP-TO-DATE   AVAILABLE   AGE
+demo          deployment.apps/kbot                          1/1     1            1           65m
+flux-system   deployment.apps/helm-controller               1/1     1            1           131m
+flux-system   deployment.apps/image-automation-controller   1/1     1            1           131m
+flux-system   deployment.apps/image-reflector-controller    1/1     1            1           131m
+flux-system   deployment.apps/kustomize-controller          1/1     1            1           131m
+flux-system   deployment.apps/notification-controller       1/1     1            1           131m
+flux-system   deployment.apps/source-controller             1/1     1            1           131m
+kube-system   deployment.apps/coredns                       2/2     2            2           85m
+
+NAMESPACE     NAME                                                     DESIRED   CURRENT   READY   AGE
+demo          replicaset.apps/kbot-755bf444b8                          0         0         0       44m
+demo          replicaset.apps/kbot-7fff54c6d9                          0         0         0       65m
+demo          replicaset.apps/kbot-86785989c6                          1         1         1       7m37s
+flux-system   replicaset.apps/helm-controller-7bdfb977b9               1         1         1       131m
+flux-system   replicaset.apps/image-automation-controller-75c6fc4447   1         1         1       131m
+flux-system   replicaset.apps/image-reflector-controller-6c46bc565f    1         1         1       131m
+flux-system   replicaset.apps/kustomize-controller-67454c8964          1         1         1       131m
+flux-system   replicaset.apps/notification-controller-7d8b849448       1         1         1       131m
+flux-system   replicaset.apps/source-controller-db6864b9               1         1         1       131m
+kube-system   replicaset.apps/coredns-c7b9fc47                         2         2         2       85m
