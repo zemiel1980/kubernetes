@@ -1,0 +1,26 @@
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: kbot
+  namespace: demo
+spec:
+  interval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: kbot
+    namespace: demo
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        name: fluxbot
+        email: flux@local
+      messageTemplate: "chore(kbot): automated image update"
+    push:
+      branch: main
+  update:
+    path: ./clusters/demo
+    strategy: Setters
+

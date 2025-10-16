@@ -1,0 +1,65 @@
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ export KUBECONFIG=/var/lib/kubelet/kubeconfig 
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ kubectl -n demo describe imageupdateautomation kbot | sed -n '/Conditions/,$p'
+  Conditions:
+    Last Transition Time:     2025-10-16T16:10:10Z
+    Message:                  repository up-to-date
+    Observed Generation:      5
+    Reason:                   Succeeded
+    Status:                   True
+    Type:                     Ready
+  Last Automation Run Time:   2025-10-16T16:31:14Z
+  Last Handled Reconcile At:  2025-10-16T16:10:45Z
+  Last Push Commit:           59c5a1c2abbc249538f97a75816a52ce214e2ebb
+  Last Push Time:             2025-10-16T16:10:10Z
+  Observed Generation:        5
+  Observed Policies:
+    Kbot:
+      Name:                  zemiel1980/kbot-src
+      Tag:                   2.2.9
+  Observed Source Revision:  main@sha1:59c5a1c2abbc249538f97a75816a52ce214e2ebb
+Events:
+  Type     Reason              Age                 From                         Message
+  ----     ------              ----                ----                         -------
+  Normal   Succeeded           46m (x2 over 46m)   image-automation-controller  repository up-to-date
+  Warning  GitOperationFailed  25m                 image-automation-controller  failed to update source: failed to run template from spec: template: commit message:2:29: executing "commit message" at <.Changed>: range can't iterate over {map[kbot-hr.yaml:map[{{{helm.toolkit.fluxcd.io/v2 HelmRelease} {kbot demo}}}:[{2.2.8 2.2.9 demo:kbot:tag}]]]}
+  Warning  GitOperationFailed  23m (x12 over 30m)  image-automation-controller  failed to update source: failed to run template from spec: template: commit message:1:47: executing "commit message" at <.Changed>: range can't iterate over {map[kbot-hr.yaml:map[{{{helm.toolkit.fluxcd.io/v2 HelmRelease} {kbot demo}}}:[{2.2.8 2.2.9 demo:kbot:tag}]]]}
+  Warning  GitOperationFailed  22m                 image-automation-controller  failed to update source: failed to push to remote: authentication required: No anonymous write access.
+  Normal   Succeeded           21m                 image-automation-controller  pushed commit '59c5a1c' to branch 'main'
+chore(kbot): automated image update
+  Normal  Succeeded  40s (x40 over 45m)  image-automation-controller  no change since last reconciliation
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ kubectl -n demo get helmrelease kbot
+NAME   AGE   READY   STATUS
+kbot   46m   True    Helm upgrade succeeded for release demo/kbot.v2 with chart kbot@2.2.5
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ kubectl -n demo get pods -l app=kbot -o=jsonpath='{range .items[*]}{.metadata.name}{"  "}{range .spec.containers[*]}{.image}{"\n"}{end}{end}'
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ docker push zemiel1980/kbot-src:2.2.10
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ #Докер пушнув на локальній машині
+@zemiel1980 ➜ /workspaces/kubernetes (main) $ kubectl -n demo describe imageupdateautomation kbot | sed -n '/Conditions/,$p'
+  Conditions:
+    Last Transition Time:     2025-10-16T16:46:58Z
+    Message:                  repository up-to-date
+    Observed Generation:      6
+    Reason:                   Succeeded
+    Status:                   True
+    Type:                     Ready
+  Last Automation Run Time:   2025-10-16T16:48:59Z
+  Last Handled Reconcile At:  2025-10-16T16:10:45Z
+  Last Push Commit:           580d27765cca7673181d4ec25a3f977ab9f034c1
+  Last Push Time:             2025-10-16T16:46:58Z
+  Observed Generation:        6
+  Observed Policies:
+    Kbot:
+      Name:                  zemiel1980/kbot-src
+      Tag:                   2.2.10
+  Observed Source Revision:  main@sha1:580d27765cca7673181d4ec25a3f977ab9f034c1
+Events:
+  Type     Reason              Age                 From                         Message
+  ----     ------              ----                ----                         -------
+  Warning  GitOperationFailed  43m                 image-automation-controller  failed to update source: failed to run template from spec: template: commit message:2:29: executing "commit message" at <.Changed>: range can't iterate over {map[kbot-hr.yaml:map[{{{helm.toolkit.fluxcd.io/v2 HelmRelease} {kbot demo}}}:[{2.2.8 2.2.9 demo:kbot:tag}]]]}
+  Warning  GitOperationFailed  41m (x12 over 47m)  image-automation-controller  failed to update source: failed to run template from spec: template: commit message:1:47: executing "commit message" at <.Changed>: range can't iterate over {map[kbot-hr.yaml:map[{{{helm.toolkit.fluxcd.io/v2 HelmRelease} {kbot demo}}}:[{2.2.8 2.2.9 demo:kbot:tag}]]]}
+  Normal   Succeeded           39m                 image-automation-controller  pushed commit '59c5a1c' to branch 'main'
+chore(kbot): automated image update
+  Warning  GitOperationFailed  12m (x9 over 15m)    image-automation-controller  failed to update source: failed to run template from spec: template: commit message:1:47: executing "commit message" at <.Changed>: range can't iterate over {map[kbot-hr.yaml:map[{{{helm.toolkit.fluxcd.io/v2 HelmRelease} {kbot demo}}}:[{2.2.9 2.2.10 demo:kbot:tag}]]]}
+  Warning  GitOperationFailed  8m54s (x3 over 39m)  image-automation-controller  failed to update source: failed to push to remote: authentication required: No anonymous write access.
+  Normal   Succeeded           2m15s                image-automation-controller  pushed commit '580d277' to branch 'main'
+chore(kbot): automated image update

@@ -1,0 +1,338 @@
+    1  export KUBECONFIG=/var/lib/kubelet/kubeconfig 
+     6  kubectl -n demo patch imageupdateautomation kbot --type merge -p '{
+    7    "spec": { "git": { "commit": { "messageTemplate": "chore(kbot): automated image update" } } }
+    8  }'
+    9  kubectl -n demo annotate imageupdateautomation kbot reconcile.fluxcd.io/requestedAt="$(date +%s)" --overwrite
+    46  export KUBECONFIG=/var/lib/kubelet/kubeconfig 
+   47  cat <<'YAML' | kubectl apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: demo
+YAML
+
+   48  cat <<'YAML' | kubectl apply -f -
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: kbot
+  namespace: demo
+spec:
+  interval: 1m0s
+  ref:
+    branch: main
+  url: https://github.com/zemiel1980/kubegitops
+YAML
+
+   49  cat <<'YAML' | kubectl apply -f -
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: kbot-demo
+  namespace: demo
+spec:
+  interval: 1m
+  prune: true
+  wait: true
+  sourceRef:
+    kind: GitRepository
+    name: kbot
+    namespace: demo
+  path: ./clusters/demo
+  timeout: 2m
+YAML
+53  cat <<'YAML' | kubectl apply -f -
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: kbot
+  namespace: demo
+spec:
+  interval: 1m
+  url: ssh://git@github.com/zemiel1980/kubegitops.git
+  ref:
+    branch: main
+  secretRef:
+    name: flux-git-ssh
+YAML
+   56  kubectl -n demo delete secret flux-git-ssh --ignore-not-found
+   71  ssh-keygen -t ed25519 -N '' -f ~/.ssh/flux-git -C "flux@local"
+   72  kubectl -n demo delete secret flux-git-ssh --ignore-not-found
+   73  cat ~/.ssh/flux-git.pub 
+   74  kubectl -n demo create secret generic flux-git-ssh   --type=kubernetes.io/ssh-auth   --from-file=ssh-privatekey=$HOME/.ssh/flux-git   --from-file=known_hosts=<(ssh-keyscan -t rsa,ecdsa,ed25519 github.com 2>/dev/null)
+   75  cat <<'YAML' | kubectl apply -f -
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: kbot
+  namespace: demo
+spec:
+  interval: 1m
+  url: ssh://git@github.com/zemiel1980/kubegitops.git
+  ref:
+    branch: main
+  secretRef:
+    name: flux-git-ssh
+YAML
+
+  101  kubectl -n flux-system run dnsdiag --image=busybox:1.36 --rm -it --restart=Never --   sh -c "nslookup github.com 10.10.0.53; echo ---; nslookup github.com 8.8.8.8; echo ---; ping -c1 github.com || true"
+
+  125  kubectl get all -A
+  126  cat <<'YAML' | kubectl apply -f -
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: coredns
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    kubernetes.io/bootstrapping: rbac-defaults
+  name: system:coredns
+rules:
+- apiGroups: [""]
+  resources: ["endpoints","services","pods","namespaces","nodes"]
+  verbs: ["list","watch"]
+- apiGroups: ["discovery.k8s.io"]
+  resources: ["endpointslices"]
+  verbs: ["list","watch"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: system:coredns
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:coredns
+subjects:
+- kind: ServiceAccount
+  name: coredns
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: coredns
+  namespace: kube-system
+data:
+  Corefile: |
+    .:53 {
+        errors
+        health
+        ready
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            fallthrough in-addr.arpa ip6.arpa
+            ttl 30
+        }
+        forward . 8.8.8.8 1.1.1.1 9.9.9.9 {
+            prefer_udp
+        }
+        cache 30
+        loop
+        reload
+        loadbalance
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coredns
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      k8s-app: kube-dns
+  template:
+    metadata:
+      labels:
+        k8s-app: kube-dns
+    spec:
+      serviceAccountName: coredns
+      priorityClassName: system-cluster-critical
+      tolerations:
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      containers:
+      - name: coredns
+        image: coredns/coredns:1.11.1
+        imagePullPolicy: IfNotPresent
+        args: ["-conf", "/etc/coredns/Corefile"]
+        ports:
+        - containerPort: 53
+          name: dns
+          protocol: UDP
+        - containerPort: 53
+          name: dns-tcp
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8181
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/coredns
+        resources:
+          requests:
+            cpu: 100m
+            memory: 70Mi
+          limits:
+            memory: 170Mi
+      volumes:
+      - name: config-volume
+        configMap:
+          name: coredns
+          items:
+          - key: Corefile
+            path: Corefile
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: kube-dns
+  namespace: kube-system
+  labels:
+    k8s-app: kube-dns
+spec:
+  selector:
+    k8s-app: kube-dns
+  clusterIP: 10.10.0.53
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+    targetPort: 53
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+    targetPort: 53
+YAML
+
+  127  kubectl -n flux-system run dnsdiag --image=busybox:1.36 --rm -it --restart=Never --   sh -c "nslookup github.com 10.10.0.53; echo ---; nslookup github.com; ping -c1 github.com || true"
+  128  kubectl -n flux-system run dnsdiag --image=busybox:1.36 --rm -it --restart=Never --   sh -c "nslookup github.com 10.10.0.53; echo ---; nslookup github.com 8.8.8.8; echo ---; ping -c1 github.com || true"
+  129  cat <<'YAML' | kubectl -n flux-system apply -f -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dnsdiag
+  labels: {app: dnsdiag}
+spec:
+  restartPolicy: Never
+  securityContext:
+    runAsNonRoot: true
+    seccompProfile: { type: RuntimeDefault }
+  containers:
+  - name: ns
+    image: busybox:1.36
+    command: ["sh","-c"]
+    args:
+      - |
+        echo "nslookup via cluster DNS (10.10.0.53)"; nslookup github.com 10.10.0.53 || true
+        echo "---"; echo "nslookup via 8.8.8.8"; nslookup github.com 8.8.8.8 || true
+        echo "---"; echo "done"; sleep 3600
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities: { drop: ["ALL"] }
+      runAsUser: 1000
+      readOnlyRootFilesystem: true
+  - name: curl
+    image: curlimages/curl:8.9.1
+    command: ["sh","-c"]
+    args:
+      - |
+        echo "HTTPS to github.com"; curl -I --max-time 5 https://github.com || true
+        echo "---"; echo "done"; sleep 3600
+    securityContext:
+      allowPrivilegeEscalation: false
+      capabilities: { drop: ["ALL"] }
+      runAsUser: 1000
+      readOnlyRootFilesystem: true
+YAML
+
+ 168  cat <<'YAML' | kubectl -n demo apply -f -
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageUpdateAutomation
+metadata:
+  name: kbot
+  namespace: demo
+spec:
+  interval: 1m
+  sourceRef:
+    kind: GitRepository
+    name: kbot
+    namespace: demo
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        name: fluxbot
+        email: flux@local
+      messageTemplate: |
+        chore(kbot): automated image update
+        {{- range $file, $updates := .Changed }}
+          {{- range $u := $updates }}
+        - {{$file}}: {{ $u.OldTag }} -> {{ $u.NewTag }} ({{ $u.Policy }})
+          {{- end }}
+        {{- end }}
+    push:
+      branch: main
+  update:
+    path: ./clusters/demo
+    strategy: Setters
+YAML
+
+  169  kubectl -n demo annotate imagerepository kbot   reconcile.fluxcd.io/requestedAt="$(date -u +%FT%TZ)" --overwrite
+  170  kubectl -n demo get imagepolicy kbot -o jsonpath='{.status.latestTag}{"\n"}'
+  171  kubectl -n demo annotate imageupdateautomation kbot   reconcile.fluxcd.io/requestedAt="$(date -u +%FT%TZ)" --overwrite
+  172  kubectl -n demo annotate kustomization kbot-demo   reconcile.fluxcd.io/requestedAt="$(date -u +%FT%TZ)" --overwrite
+  173  kubectl -n demo describe imageupdateautomation kbot | sed -n '/Conditions/,$p'
+  174  kubectl -n demo patch imageupdateautomation kbot --type=merge -p '{
+  "spec": { "git": { "commit": { "messageTemplate": "chore(kbot): automated image update" } } }
+}'
+  175  kubectl -n demo patch gitrepository kbot --type=merge -p '{
+  "spec": {
+    "url": "ssh://git@github.com/zemiel1980/kubegitops.git",
+    "secretRef": { "name": "flux-git-ssh" }
+  }
+}'
+  176  kubectl -n demo annotate imagerepository kbot reconcile.fluxcd.io/requestedAt="$(date -u +%FT%TZ)" --overwrite
+  177  kubectl -n demo annotate imageupdateautomation kbot reconcile.fluxcd.io/requestedAt="$(date -u +%FT%TZ)" --overwrite
+  178  ubectl -n demo annotate kustomization kbot-demo           reconcile.fluxcd.io/requestedAt="$(date -u +%FT%TZ)" --overwrite
+  179  kubectl -n demo annotate kustomization kbot-demo           reconcile.fluxcd.io/requestedAt="$(date -u +%FT%TZ)" --overwrite
+  180  kubectl -n demo describe imageupdateautomation kbot | sed -n '/Conditions/,$p'
+  181  kubectl -n demo get helmrelease kbot
+  182  kubectl -n demo rollout status deploy/kbot --timeout=2m
+  183  kubectl -n demo get pods -l app=kbot -o=jsonpath='{range .items[*]}{.metadata.name}{"  "}{range .spec.containers[*]}{.image}{"\n"}{end}{end}'
+  184  history > 222.txt

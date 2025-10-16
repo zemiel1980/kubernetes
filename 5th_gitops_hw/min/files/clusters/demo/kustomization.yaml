@@ -1,0 +1,12 @@
+# clusters/demo/kustomization.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+targetNamespace: demo
+resources:
+  - ns.yaml
+  - secret.yaml
+  - kbot-hr.yaml
+  - kbot-gr.yaml
+  - image-policy.yaml
+  - image-update.yaml
+  - image-repository.yaml

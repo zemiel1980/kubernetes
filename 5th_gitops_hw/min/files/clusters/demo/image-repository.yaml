@@ -1,0 +1,8 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: kbot
+  namespace: demo
+spec:
+  image: zemiel1980/kbot-src
+  interval: 1m

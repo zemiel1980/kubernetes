@@ -1,0 +1,13 @@
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: kbot
+  namespace: demo
+spec:
+  interval: 1m0s
+  ref:
+    branch: main
+  url: ssh://git@github.com/zemiel1980/kubegitops.git
+  secretRef:
+    name: flux-git-ssh
+

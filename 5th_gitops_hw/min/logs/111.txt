@@ -1,0 +1,16 @@
+    1  export KUBECONFIG=/var/lib/kubelet/kubeconfig 
+    6  cd mastering-k8s/
+   15  ./controlplane.sh cleanup
+   17  ./controlplane.sh stop
+   18  ./download.sh 
+   19  ./pki.sh 
+   20  ./controlplane.sh start
+   21  ls -la /var/lib/kubelet/kubeconfig 
+   22  chmod +r /var/lib/kubelet/kubeconfig 
+   23  sudo chmod +r /var/lib/kubelet/kubeconfig 
+   38  kubectl apply -f https://github.com/fluxcd/flux2/releases/latest/download/install.yaml
+   39  kubectl -n kube-system delete svc kube-dns --ignore-not-found
+   40  kubectl -n kube-system rollout restart deploy/coredns
+   41  kubectl -n kube-system delete svc kube-dns --ignore-not-found
+   42  kubectl apply -f https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.2.0/standard-install.yaml
+   43  history >111.txt
